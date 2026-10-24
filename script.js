@@ -27,6 +27,37 @@ if (siteHeader) {
 }
 
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+const pageLoader = document.querySelector('.page-loader');
+if (pageLoader && !motionPreference.matches) {
+  let loaderSeen = false;
+  try {
+    loaderSeen = sessionStorage.getItem('portfolio-loader-seen') === 'true';
+  } catch (error) {
+    loaderSeen = false;
+  }
+
+  if (loaderSeen) {
+    document.documentElement.classList.add('is-loaded');
+  } else {
+    document.documentElement.classList.add('has-page-loader');
+    let loaderFinished = false;
+    const finishLoading = () => {
+      if (loaderFinished) return;
+      loaderFinished = true;
+      document.documentElement.classList.add('is-loaded');
+      try {
+        sessionStorage.setItem('portfolio-loader-seen', 'true');
+      } catch (error) {
+        // Continue without storing the session preference.
+      }
+    };
+    window.addEventListener('load', () => window.setTimeout(finishLoading, 640), { once: true });
+    window.setTimeout(finishLoading, 1800);
+  }
+} else {
+  document.documentElement.classList.add('is-loaded');
+}
+
 if ('IntersectionObserver' in window && !motionPreference.matches) {
   document.documentElement.classList.add('js-reveal');
   const revealTargets = document.querySelectorAll(
